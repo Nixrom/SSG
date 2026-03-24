@@ -21,20 +21,26 @@ class LeafNode(HTMLNode):
         super().__init__(tag, value, None, props)
     def to_html(self):
         if self.value == None:
-            raise ValueError
+            raise ValueError("No Value")
         if self.tag == None:
             return f"{self.value}"
-        if self.tag == "b":
-            return f"<b>{self.value}</b>"
-        if self.tag == "i":
-            return f"<i>{self.value}</i>"
-        if self.tag == "p":
-            return f"<p>{self.value}</p>"
-        if self.tag == "code":
-            return f"<code>{self.value}</code>"
         if self.tag == "a":
             return f"<a href=\"{self.props["href"]}\">{self.value}</a>"
         if self.tag == "img":
             return f"<img src=\"{self.props["src"]}\" alt=\"{self.value}\" />"
+        return f"<{self.tag}>{self.value}</{self.tag}>"
     def __repr__(self):
         return(f"tag={self.tag}, value={self.value},  props={self.props_to_html()}")
+
+class ParentNode(HTMLNode):
+    def __init__(self, tag, children, props=None):
+        super().__init__(tag, None, children, props)
+    def to_html(self):
+        if self.tag == None:
+            raise ValueError("No Tag")
+        if self.children == None:
+            raise ValueError("No Children")
+        der_children =""
+        for i in self.children:
+            der_children += i.to_html()
+        return f"<{self.tag}>{der_children}</{self.tag}>"
