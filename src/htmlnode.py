@@ -27,7 +27,7 @@ class LeafNode(HTMLNode):
         if self.tag == "a":
             return f"<a href=\"{self.props["href"]}\">{self.value}</a>"
         if self.tag == "img":
-            return f"<img src=\"{self.props["src"]}\" alt=\"{self.value}\" />"
+            return f"<img src=\"{self.props["src"]}\" alt=\"{self.props["alt"]}\" />"
         return f"<{self.tag}>{self.value}</{self.tag}>"
     def __repr__(self):
         return(f"tag={self.tag}, value={self.value},  props={self.props_to_html()}")
