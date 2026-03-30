@@ -21,6 +21,10 @@ class TestHTMLNode(unittest.TestCase):
     def test_split_start(self):
         node = TextNode("`code block` This is text with two `code block` words", TextType.TEXT)
         new_nodes = split_nodes_delimiter([node], "`", TextType.CODE)
-        for i in new_nodes:
-            print(i)
         self.assertEqual(new_nodes, [TextNode("code block", TextType.CODE), TextNode(" This is text with two ", TextType.TEXT),TextNode("code block", TextType.CODE), TextNode(" words", TextType.TEXT)])
+    def test_extract_markdown_images(self):
+        matches = extract_markdown_images("This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)")
+        self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
+    def test_extract_markdown_links(self):
+        matches = extract_markdown_links("This is text with a [link](https://i.imgur.com/zjjcJKZ.png), sorry, [more than one link.](Test link)")
+        self.assertListEqual([("link", "https://i.imgur.com/zjjcJKZ.png"), ("more than one link.", "Test link")], matches)
