@@ -59,3 +59,41 @@ def extract_markdown_images(text):
 
 def extract_markdown_links(text):
     return re.findall(r"(?<!\!)\[(.+?)\]\((.+?)\)", text)
+
+def split_nodes_image(old_nodes):
+    final_nodes = []
+    for o_node in old_nodes:
+        delim = extract_markdown_images(o_node.text)
+        o_node_text = o_node.text
+        for i in range(0, len(delim)):
+            o_node_text = o_node_text.split(f"![{delim[i][0]}]({delim[i][1]})", 1)
+            if o_node_text[0] == "":
+                final_nodes.append(TextNode(delim[i][0], TextType.IMAGE, delim[i][1]))
+            else:
+                final_nodes.append(TextNode(o_node_text[0], TextType.TEXT))
+                final_nodes.append(TextNode(delim[i][0], TextType.IMAGE, delim[i][1]))
+            if i < len(delim):
+                o_node_text = o_node_text[1]
+            elif len(o_node_text) > 1:
+                if o_node_text[1] != "":
+                    final_nodes.append(TextNode(o_node_text[1], TextType.TEXT))
+    return final_nodes
+
+def split_nodes_link(old_nodes):
+    final_nodes = []
+    for o_node in old_nodes:
+        delim = extract_markdown_links(o_node.text)
+        o_node_text = o_node.text
+        for i in range(0, len(delim)):
+            o_node_text = o_node_text.split(f"[{delim[i][0]}]({delim[i][1]})", 1)
+            if o_node_text[0] == "":
+                final_nodes.append(TextNode(delim[i][0], TextType.LINK, delim[i][1]))
+            else:
+                final_nodes.append(TextNode(o_node_text[0], TextType.TEXT))
+                final_nodes.append(TextNode(delim[i][0], TextType.LINK, delim[i][1]))
+            if i < len(delim):
+                o_node_text = o_node_text[1]
+            elif len(o_node_text) > 1:
+                if o_node_text[1] != "":
+                    final_nodes.append(TextNode(o_node_text[1], TextType.TEXT))
+    return final_nodes
