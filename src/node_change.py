@@ -25,10 +25,11 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
         if i.text_type != TextType.TEXT:
             end_list.append(i)
             continue
-        if i.text.count(delimiter) < 2:
-            raise Exception("Invalid markdown text: too few delimiters")
-        if i.text.count(delimiter) % 2:
-            raise Exception("Invalid markdown text: odd number of delimiters")
+        if i.text.count(delimiter) % 2 and i.text.count(delimiter) > 1:
+            raise Exception(f"Invalid markdown text: odd number of {delimiter} delimiters")
+        if i.text.count(delimiter) == 0:
+            end_list.append(i)
+            continue
         split_text = i.text.split(delimiter)
         if i.text.find(delimiter) == 0:
             count = 0
@@ -65,6 +66,9 @@ def split_nodes_image(old_nodes):
     for o_node in old_nodes:
         delim = extract_markdown_images(o_node.text)
         o_node_text = o_node.text
+        if len(delim) == 0:
+            final_nodes.append(o_node)
+            continue
         for i in range(0, len(delim)):
             o_node_text = o_node_text.split(f"![{delim[i][0]}]({delim[i][1]})", 1)
             if o_node_text[0] == "":
@@ -72,11 +76,9 @@ def split_nodes_image(old_nodes):
             else:
                 final_nodes.append(TextNode(o_node_text[0], TextType.TEXT))
                 final_nodes.append(TextNode(delim[i][0], TextType.IMAGE, delim[i][1]))
-            if i < len(delim):
-                o_node_text = o_node_text[1]
-            elif len(o_node_text) > 1:
-                if o_node_text[1] != "":
-                    final_nodes.append(TextNode(o_node_text[1], TextType.TEXT))
+            o_node_text = o_node_text[1]
+            if i+1 == len(delim) and o_node_text != "":
+                final_nodes.append(TextNode(o_node_text, TextType.TEXT))
     return final_nodes
 
 def split_nodes_link(old_nodes):
@@ -84,6 +86,9 @@ def split_nodes_link(old_nodes):
     for o_node in old_nodes:
         delim = extract_markdown_links(o_node.text)
         o_node_text = o_node.text
+        if len(delim) == 0:
+            final_nodes.append(o_node)
+            continue
         for i in range(0, len(delim)):
             o_node_text = o_node_text.split(f"[{delim[i][0]}]({delim[i][1]})", 1)
             if o_node_text[0] == "":
@@ -91,9 +96,16 @@ def split_nodes_link(old_nodes):
             else:
                 final_nodes.append(TextNode(o_node_text[0], TextType.TEXT))
                 final_nodes.append(TextNode(delim[i][0], TextType.LINK, delim[i][1]))
-            if i < len(delim):
-                o_node_text = o_node_text[1]
-            elif len(o_node_text) > 1:
-                if o_node_text[1] != "":
-                    final_nodes.append(TextNode(o_node_text[1], TextType.TEXT))
+            o_node_text = o_node_text[1]
+            if i+1 == len(delim) and o_node_text != "":
+                final_nodes.append(TextNode(o_node_text, TextType.TEXT))
     return final_nodes
+
+def text_to_textnodes(text):
+    nodes = [TextNode(text, TextType.TEXT)]
+    for i in [["**", TextType.BOLD], ["_", TextType.ITALIC], ["`", TextType.CODE]]:
+        nodes = split_nodes_delimiter(nodes, i[0], i[1])
+    nodes = split_nodes_image(nodes)
+    nodes = split_nodes_link(nodes)
+    return nodes
+
