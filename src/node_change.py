@@ -1,5 +1,6 @@
 from textnode import *
 from htmlnode import *
+from block_functions import *
 import re
 
 def text_node_to_html_node(text_node):
@@ -16,6 +17,8 @@ def text_node_to_html_node(text_node):
             return LeafNode("a", text_node.text, {"href":text_node.url})
         case TextType.IMAGE:
             return LeafNode("img", "", {"src":text_node.url, "alt":text_node.text})
+        case TextType.PARAGRAPH:
+            return LeafNode("p", text_node.text)
         case _:
             raise Exception("Not a text type")
 
@@ -109,3 +112,28 @@ def text_to_textnodes(text):
     nodes = split_nodes_link(nodes)
     return nodes
 
+def paragraph_text_to_textnodes(text):
+    hold_line = text.split("\n")
+    hold_line_2 = " ".join(hold_line)
+    nodes = [TextNode(hold_line_2, TextType.TEXT)]
+    for i in [["**", TextType.BOLD], ["_", TextType.ITALIC], ["`", TextType.CODE]]:
+        nodes = split_nodes_delimiter(nodes, i[0], i[1])
+    nodes = split_nodes_image(nodes)
+    nodes = split_nodes_link(nodes)
+    return nodes
+
+def markdown_to_html_node(markdown):
+    blocks = markdown_to_blocks(markdown)
+    child_hold = []
+    for block in blocks:
+        if block_to_block_type(block) == BlockType.HEADING:
+            child_hold.append(LeafNode("header", block.strip("#")))
+        if block_to_block_type(block) == BlockType.PARAGRAPH:
+            nested_children_hold = []
+            for node in paragraph_text_to_textnodes(block):
+                nested_children_hold.append(text_node_to_html_node(node))
+            child_hold.append(ParentNode("p", nested_children_hold))
+
+        if block_to_block_type(block) == BlockType.CODE:
+            child_hold.append(ParentNode("pre", [LeafNode("code", block.split("```\n")[1].split("```")[0])]))
+    return ParentNode("div", child_hold)

@@ -22,7 +22,7 @@ def block_to_block_type(text):
     lines = text.split("\n")
     if re.findall(r"(?<!.)(#{1,6} ).+(?!\n)", text) and len(lines) == 1:
         return BlockType.HEADING
-    if re.findall(r"(?<!.)(```\n.+\n```)", text):
+    if re.findall(r"(?<!.)(```\n(.|\n)*\n```)", text):
         return BlockType.CODE
     if len(lines) == len(re.findall(r"(?<!.)(>)", text)):
         return BlockType.QUOTE
