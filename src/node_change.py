@@ -129,9 +129,9 @@ def block_to_html_node(block):
         return heading_to_html_node(block)
     if block_type == BlockType.CODE:
         return code_to_html_node(block)
-    if block_type == BlockType.OLIST:
+    if block_type == BlockType.ORDERED_LIST:
         return olist_to_html_node(block)
-    if block_type == BlockType.ULIST:
+    if block_type == BlockType.UNORDERED_LIST:
         return ulist_to_html_node(block)
     if block_type == BlockType.QUOTE:
         return quote_to_html_node(block)
@@ -210,3 +210,7 @@ def quote_to_html_node(block):
     children = text_to_children(content)
     return ParentNode("blockquote", children)
 
+def extract_title(markdown):
+    if not re.findall(r"(?<!.)#{1}[^#](.+)", markdown):
+        raise Exception("No Header")
+    return (re.findall(r"(?<!.)#{1}[^#](.+)", markdown)[0].strip())

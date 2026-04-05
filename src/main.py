@@ -1,23 +1,17 @@
 from textnode import TextNode
+from copy_overwrite import replace_with_copy
+from generate_page import generate_page
 import os
-import shutil
+
+src = os.path.abspath("static")
+dst = os.path.abspath("public")
+gn_from = os.path.abspath("content/index.md")
+gn_tmpl = os.path.abspath("template.html")
+gn_to = "public/index.html"
 
 def main():
-    replace_with_copy("static", "public", True)
+    replace_with_copy(src, dst, True)
+    generate_page(gn_from, gn_tmpl, gn_to)
 
-def replace_with_copy(source, destination, delete=False):
-    src = os.path.abspath(source)
-    dst = os.path.abspath(destination)
-    if delete == True:
-        shutil.rmtree(dst)
-        os.mkdir(dst)
-    for entity in os.listdir(src):
-        ent = os.path.join(src, entity)
-        if os.path.isfile(ent):
-            shutil.copy(ent, dst)
-        if os.path.isdir(ent):
-            copy_ent = os.path.join(dst, entity)
-            os.mkdir(copy_ent)
-            replace_with_copy(ent, copy_ent)
 
 main()
