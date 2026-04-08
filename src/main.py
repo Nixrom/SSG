@@ -9,8 +9,8 @@ src_2 = os.path.abspath("content")
 dst = os.path.abspath("docs")
 gn_tmpl = os.path.abspath("template.html")
 basepath = "/"
-if sys.argv[1] != "":
-    basepath = sys.argv[1]
+#if sys.argv[1] != "":
+#    basepath = sys.argv[1]
 
 def main():
     replace_with_copy(src, dst, True)
